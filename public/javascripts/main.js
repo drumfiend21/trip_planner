@@ -91,6 +91,18 @@ $(document).ready(function() {
                 day.thingMark.forEach(function(thingMarker) {
                     thingMarker.setMap(null)
                 })
+                possObj.thingMark.setMap(null);
+                possObj.hotelMark.setMap(null);
+                possObj.restMark.setMap(null);
+                $("#possHotel option").filter(function() {
+                    return $(this).text() == "--"
+                }).attr('selected', true);
+                $("#possRest option").filter(function() {
+                    return $(this).text() == "--"
+                }).attr('selected', true);
+                $("#possThing option").filter(function() {
+                    return $(this).text() == "--"  
+                }).attr('selected', true);
             } else {
                 day.hotelMark.setMap(map);
                 day.restMark.forEach(function(restMarker) {
@@ -180,7 +192,11 @@ $(document).ready(function() {
 
         } else {
             possObj.hotelMark.setMap(null);
-            alert('You already booked a Hotel');
+            if(hName ===""){
+                alert("Make your selection")
+            }else{
+                alert('You already booked a Hotel');
+            }
             $("#possHotel option").filter(function() {
                 return $(this).text() == "--"
             }).attr('selected', true);
@@ -226,7 +242,11 @@ $(document).ready(function() {
             }
         } else {
             possObj.restMark.setMap(null);
-            alert('You\'ve booked three restaurants!');
+            if(hName ===""){
+                alert("Make your selection")
+            }else{
+                alert('You\'ve booked three restaurants!');
+            }
             $("#possRest option").filter(function() {
                 return $(this).text() == "--"
             }).attr('selected', true);
@@ -271,7 +291,11 @@ $(document).ready(function() {
             }
         } else {
             possObj.thingMark.setMap(null);
+            if(hName ===""){
+                alert("Make your selection")
+            }else{
             alert('You already have four things to do today!');
+            }
             $("#possThing option").filter(function() {
                 return $(this).text() == "--"
             }).attr('selected', true);
@@ -368,6 +392,22 @@ $(document).ready(function() {
         $('#active-day').removeAttr("id");
         $(this).attr("id", "active-day");
         $('#day-number').text(day);
+        if(dayArray.length === 1){
+
+            $('#remove-day').css('display','none');
+        }
+        // possObj.thingMark.setMap(null);
+        // possObj.hotelMark.setMap(null);
+        // possObj.restMark.setMap(null);
+        // $("#possHotel option").filter(function() {
+        //     return $(this).text() == "--"
+        // }).attr('selected', true);
+        // $("#possRest option").filter(function() {
+        //     return $(this).text() == "--"
+        // }).attr('selected', true);
+        // $("#possThing option").filter(function() {
+        //     return $(this).text() == "--"
+        // }).attr('selected', true);
     })
 
     $('#remove-day').click(function(){
@@ -385,8 +425,19 @@ $(document).ready(function() {
         $("#active-day").next().remove();
         //remove the day html
         $('#day-'+dayArray.length).remove();
+        //remove all markers for the day
+        var index = dayArray.length-1;
+        dayArray[index].hotelMark.setMap(null);
+        dayArray[index].restMark.forEach(function(restMarker) {
+            restMarker.setMap(null)
+        })
+        dayArray[index].thingMark.forEach(function(thingMarker) {
+            thingMarker.setMap(null)
+        })
+
         //remove from dayArray
         dayArray.pop();
+        
         //display previous day html
         $('#day-'+dayArray.length).css('display','block')
         //are we at day 1?  if so, remove 'remove day ' button
@@ -394,6 +445,7 @@ $(document).ready(function() {
 
             $('#remove-day').css('display','none');
         }
+        removeAllMarkersExceptDay(dayArray.length);
     })
 
 
@@ -403,49 +455,65 @@ $(document).ready(function() {
 
     $("#possHotel").change(function(){
         var hotName = $(this).val()
-        var lat;
-        var lon;
-        all_hotels.forEach(function(hotelObject){
-            if(hotelObject.name === hotName){
-                lat = hotelObject.place[0].location[0]
-                lon = hotelObject.place[0].location[1]
-            }
-        });
-        possObj.hotelMark.position = new google.maps.LatLng(lat, lon);
-        newBounds(possObj.hotelMark.position);
-        possObj.hotelMark.title= hotName;
-        possObj.hotelMark.setMap(map);
-
+        if(hotName !== "") {
+            var lat;
+            var lon;
+            all_hotels.forEach(function(hotelObject){
+                if(hotelObject.name === hotName){
+                    lat = hotelObject.place[0].location[0]
+                    lon = hotelObject.place[0].location[1]
+                }
+            });
+            possObj.hotelMark.position = new google.maps.LatLng(lat, lon);
+            newBounds(possObj.hotelMark.position);
+            possObj.hotelMark.title= hotName;
+            possObj.hotelMark.setMap(map);
+        } else {
+            possObj.hotelMark.setMap(null);
+        }
     })
     $("#possRest").change(function(){
         var restName = $(this).val()
-        var lat;
-        var lon;
-        all_restaurants.forEach(function(restaurantObject){
-            if(restaurantObject.name === restName){
-                lat = restaurantObject.place[0].location[0]
-                lon = restaurantObject.place[0].location[1]
-            }
-        });
-        possObj.restMark.position = new google.maps.LatLng(lat, lon);
-        newBounds(possObj.restMark.position);
-        possObj.restMark.title = restName;
-        possObj.restMark.setMap(map);
+        if(restName !== "") {
+            var lat;
+            var lon;
+            all_restaurants.forEach(function(restaurantObject){
+                if(restaurantObject.name === restName){
+                    lat = restaurantObject.place[0].location[0]
+                    lon = restaurantObject.place[0].location[1]
+                }
+            });
+            possObj.restMark.position = new google.maps.LatLng(lat, lon);
+            newBounds(possObj.restMark.position);
+            possObj.restMark.title = restName;
+            possObj.restMark.setMap(map);
+        } else {
+            possObj.restMark.setMap(null);
+        }
     })
     $("#possThing").change(function(){
         var thingName = $(this).val()
-        var lat;
-        var lon;
-        all_things_to_do.forEach(function(thingObject){
-            if(thingObject.name === thingName){
-                lat = thingObject.place[0].location[0]
-                lon = thingObject.place[0].location[1]
-            }
-        });  
-        possObj.thingMark.position = new google.maps.LatLng(lat, lon);
-        newBounds(possObj.thingMark.position);
-        possObj.thingMark.title = thingName;
-        possObj.thingMark.setMap(map);
+        if(thingName !== "") {
+            var lat;
+            var lon;
+            all_things_to_do.forEach(function(thingObject){
+                if(thingObject.name === thingName){
+                    lat = thingObject.place[0].location[0]
+                    lon = thingObject.place[0].location[1]
+                }
+            });  
+            possObj.thingMark.position = new google.maps.LatLng(lat, lon);
+            newBounds(possObj.thingMark.position);
+            possObj.thingMark.title = thingName;
+            possObj.thingMark.setMap(map);
+        } else {
+            possObj.thingMark.setMap(null);
+        }
+    })
+
+    $("#eyeSelect").click(function(){
+        $("#sidebar").fadeToggle()
+        $("#sidebar-ontop").fadeToggle()
     })
 
 });
